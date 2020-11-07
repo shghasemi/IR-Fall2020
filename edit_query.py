@@ -15,27 +15,37 @@ def get_jaccard_similarity(s1, s2):
     bigrams2 = [s2[i:i + 2] for i in range(len(s2) - 1)]
     intersection = list(set(bigrams1) & set(bigrams2))
     union = list(set(bigrams1) | set(bigrams2))
-
     return len(intersection) / len(union)
 
 
-def get_closest_words_jaccard(words, s, count):
+def get_closest_words_jaccard(words, s, j_thresh):
     jaccard_similarities = [(word, get_jaccard_similarity(s, word)) for word in words]
     jaccard_similarities = sorted(jaccard_similarities, key=lambda x: x[1])
     jaccard_similarities.reverse()
     # print(jaccard_similarities)
-    return [jaccard_similarities[i][0] for i in range(count)]
+    close_words = []
+    for j_sim in jaccard_similarities:
+        if j_sim[1] < j_thresh:
+            break
+        close_words.append(j_sim[0])
+    return close_words
 
 
 def get_closest_word_edit_distance(words, s):
     distances = [(word, get_edit_distance(word, s, len(word), len(s))) for word in words]
     distances = sorted(distances, key=lambda x: x[1])
-    return distances[0][0]
+    min_distance = distances[0][1]
+    close_words = []
+    for dist in distances:
+        if dist[1] > min_distance:
+            break
+        close_words.append(dist[0])
+    return close_words
 
-def find_closest_word(words, s, j_count):
-    closest_words = get_closest_words_jaccard(words, s, j_count)
-    closest_word = get_closest_word_edit_distance(closest_words, s)
-    return closest_words, closest_word
+def find_closest_word(words, s, j_thresh):
+    closest_jaccard_words = get_closest_words_jaccard(words, s, j_thresh)
+    closest_distance_words = get_closest_word_edit_distance(closest_jaccard_words, s)
+    return closest_jaccard_words, closest_distance_words
 
 def edit_query(dictionary, query):
     edited_query = []
@@ -43,10 +53,10 @@ def edit_query(dictionary, query):
         if qw in dictionary:
             edited_query.append(qw)
         else:
-            closest_words, closest_word = find_closest_word(dictionary, qw, 30)
-            edited_query.append(closest_word)
-            print("Closest jaccard words to query word {} : {}".format(qw, closest_words))
-            print("Final closest word to query word {} : {}".format(qw, closest_word))
+            closest_jaccard_words, closest_distance_words = find_closest_word(dictionary, qw, 0.3)
+            edited_query.append(closest_distance_words)
+            print("Closest jaccard words to query word {} : {}".format(qw, closest_jaccard_words))
+            print("Final closest words to query word {} : {}".format(qw, closest_distance_words))
 
     return edited_query
 
