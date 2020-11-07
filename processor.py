@@ -1,4 +1,5 @@
 import nltk
+import hazm
 import re
 from collections import defaultdict
 from nltk.stem import PorterStemmer
@@ -21,15 +22,14 @@ class EnglishProcessor:
         stemmed_list = self.stem(token_list)
         return stemmed_list
 
-
     def remove_punctuations(self, sentence):
         return re.sub(r'[^\w\s]', '', sentence)
 
     def stem(self, token_list):
         stemmer = PorterStemmer(PorterStemmer.ORIGINAL_ALGORITHM)
-        return [stemmer.stem(x) for x in token_list]
+        return [stemmer.stem(token) for token in token_list]
 
-    def preprocess_docs(self, docs):
+    def process_docs(self, docs):
         normalized_docs = [self.normalize(doc) for doc in docs]
 
         stop_words = self.find_stop_words(normalized_docs)
@@ -56,5 +56,39 @@ class EnglishProcessor:
         print("Total word count = {}, stop word count threshold = {}".format(total_word_count, stop_word_count))
         return stop_words
 
-    def remove_stopwords(self, stopwords, tokens):
-        return [x for x in tokens if x not in stopwords]
+    def remove_stopwords(self, stopwords, token_list):
+        return [token for token in token_list if token not in stopwords]
+
+
+class PersianProcessor:
+
+    def normalize(self, sentence):
+        return self.stem(self.tokenize(self.remove_puncts(hazm.Normalizer().normalize(sentence))))
+
+    def tokenize(self, sentence):
+        return hazm.word_tokenize(sentence)
+
+    def remove_puncts(self, sentence):
+        return re.sub(r'[^\w\s]', '', re.sub(r'[a-zA-Z_]', '', re.sub(r'[۰-۹0-9]', ' ', sentence)))
+
+    def stem(self, token_list):
+        stemmer = hazm.Stemmer()
+        return [stemmer.stem(token) for token in token_list]
+
+    def remove_stopwords(self, token_list, stopwords):
+        return [token for token in token_list if token not in stopwords]
+
+    def process_docs(self, docs):
+        processed_docs = [self.normalize(doc) for doc in docs]
+        stopwords = self.find_stopwords(processed_docs)
+        processed_docs = [self.remove_stopwords(doc, stopwords.keys()) for doc in processed_docs]
+        return processed_docs, stopwords
+
+    def find_stopwords(self, docs):
+        word_freq = {}
+        for doc in docs:
+            for word in doc:
+                word_freq[word] = 1 if word not in word_freq else word_freq[word] + 1
+        thr = sum(word_freq.values()) * 0.008
+        stopwords = {word: freq for word, freq in word_freq.items() if freq >= thr}
+        return stopwords
