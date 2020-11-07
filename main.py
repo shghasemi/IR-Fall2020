@@ -39,4 +39,4 @@ class InformationRetrieval():
 import nltk
 if __name__ == '__main__':
     nltk.download('punkt')
-    ir = InformationRetrieval("english")
+    # ir = InformationRetrieval("english")
