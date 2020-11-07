@@ -15,3 +15,15 @@ class Compressor:
             else:
                 bytes.append(int('0' + bin_num_str, 2))
             number //= 128
+
+    def variable_byte_decode(self, bytestream):
+        num = 0
+        numbers = []
+        for byte in unpack('%dB' % len(bytestream), bytestream):
+            if byte < 128:
+                num = 128 * num + byte
+            else:
+                num = 128 * num + (byte - 128)
+                numbers.append(num)
+                num = 0
+        return numbers

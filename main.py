@@ -13,13 +13,12 @@ class InformationRetrieval():
         self.title_processed_docs, self.title_stop_words = None, None
         if self.lang == "english":
             self.read_english_data()
-            self.pi = PositionalIndex("persian pi", self.processed_docs)
-        else:
-            self.read_persian_data()
             self.pi = PositionalIndex("description english pi", self.processed_docs)
             self.tpi = PositionalIndex("title english pi", self.title_processed_docs)
             self.tpi.show_posting_list("man")
-
+        else:
+            self.read_persian_data()
+            self.pi = PositionalIndex("persian pi", self.processed_docs)
 
     def read_persian_data(self):
         docs = self.read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
