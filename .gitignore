@@ -1,3 +1,6 @@
+*
 venv
-data
-__pycache__
+
+!.gitignore
+!requirements.txt
+!*.py
