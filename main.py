@@ -3,30 +3,41 @@ from processor import EnglishProcessor
 from processor import PersianProcessor
 import os
 import xml.etree.ElementTree as ElementTree
+from PositionalIndex import PositionalIndex
 
 
-def read_xml(path, namespace):
-    root = ElementTree.parse(path).getroot()
-    docs = [page.find(namespace + 'revision/' + namespace + 'text').text for page in root.findall(namespace + 'page')]
-    return docs
-
-print("Please select language: 1:English 2:Persian")
-lang = int(input())
-
-if lang == 1:
-    doc = pd.read_csv(os.path.join('data', 'ted_talks.csv'))
-    processor = EnglishProcessor()
-    processed_docs, stopwords = processor.process_docs(doc['description'])
-    print("initial doc 0 : ", doc['description'][0])
-    print("final doc 0 : ", processed_docs[0])
-    print("Stop words : ", stopwords)
-
-if lang == 2:
-    docs = read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
-    processor = PersianProcessor()
-    processed_docs, stopwords = processor.process_docs(docs)  # [:10])
-    print("processed doc 0 : ", processed_docs[0])
-    print('Persian stopwords: {}'.format(stopwords))
+class InformationRetrieval():
+    def __init__(self, lang):
+        self.lang = lang
+        self.processed_docs, self.stop_words = None , None
+        self.title_processed_docs, self.title_stop_words = None, None
+        if self.lang == "english":
+            self.read_english_data()
+            self.pi = PositionalIndex("persian pi", self.processed_docs)
+        else:
+            self.read_persian_data()
+            self.pi = PositionalIndex("description english pi", self.processed_docs)
+            self.tpi = PositionalIndex("title english pi", self.title_processed_docs)
+            self.tpi.show_posting_list("man")
 
 
-# if __name__ == '__main__':
+    def read_persian_data(self):
+        docs = self.read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
+        processor = PersianProcessor()
+        self.processed_docs, self.stopwords = processor.process_docs(docs)
+
+    def read_english_data(self):
+        doc = pd.read_csv(os.path.join('data', 'ted_talks.csv'))
+        processor = EnglishProcessor()
+        self.processed_docs, selfstopwords = processor.process_docs(doc['description'])
+        self.title_processed_docs, self.title_stopwords = processor.process_docs(doc['title'])
+
+    def read_xml(self, path, namespace):
+        root = ElementTree.parse(path).getroot()
+        docs = [page.find(namespace + 'revision/' + namespace + 'text').text for page in root.findall(namespace + 'page')]
+        return docs
+
+import nltk
+if __name__ == '__main__':
+    nltk.download('punkt')
+    ir = InformationRetrieval("english")

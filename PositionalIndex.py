@@ -14,13 +14,13 @@ class PositionalIndex:
         for doc_id, doc_info in enumerate(docs):
             self.add_new_doc(doc_id, doc_info)
 
-    def add_new_doc(self, doc_id, doc_info):
-        for term_info in doc_info:
-            if term_info[0] not in self.index:
-                self.index[term_info[0]] = dict()
-            if doc_id not in self.index[term_info[0]]:
-                self.index[term_info[0]][doc_id] = []
-            self.index[term_info[0]][doc_id].append(term_info[1])
+    def add_new_doc(self, doc_id, doc):
+        for position, term in enumerate(doc):
+            if term not in self.index:
+                self.index[term] = dict()
+            if doc_id not in self.index[term]:
+                self.index[term][doc_id] = []
+            self.index[term][doc_id].append(position)
 
     def delete_doc(self, doc_id):
         for term in self.index.keys():
