@@ -4,6 +4,7 @@ from processor import PersianProcessor
 import os
 import xml.etree.ElementTree as ElementTree
 from PositionalIndex import PositionalIndex
+from edit_query import edit_query
 
 
 class InformationRetrieval():
@@ -39,5 +40,16 @@ class InformationRetrieval():
 
 
 if __name__ == '__main__':
-    ir = InformationRetrieval('persian')
-    print(ir.processor.stopwords_freq)
+    ir = InformationRetrieval('english')
+    # print(ir.processor.stopwords_freq)
+
+
+
+    # Edit query
+    print("Please enter a wrong query :)")
+    query = input()
+    processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
+    edited_query = edit_query(ir.pi.index.keys(), processed_query)
+    print("Initial query: ", query)
+    print("Processed query: ", processed_query)
+    print("Edited query: ", edited_query)
