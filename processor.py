@@ -51,7 +51,7 @@ class EnglishProcessor:
                 total_word_count += 1
 
         stop_word_count = total_word_count // 100
-        stop_words = [word for word, count in word_freq.items() if count > stop_word_count]
+        stop_words = [(word, count) for word, count in word_freq.items() if count > stop_word_count]
 
         print("Total word count = {}, stop word count threshold = {}".format(total_word_count, stop_word_count))
         return stop_words
