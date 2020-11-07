@@ -6,6 +6,9 @@ from nltk.stem import PorterStemmer
 
 
 class EnglishProcessor:
+    def __init__(self):
+        self.stopwords_freq = {}
+        self.stopwords = []
 
     def normalize(self, sentence):
 
@@ -29,17 +32,15 @@ class EnglishProcessor:
         stemmer = PorterStemmer(PorterStemmer.ORIGINAL_ALGORITHM)
         return [stemmer.stem(token) for token in token_list]
 
-    def process_docs(self, docs):
+    def process_docs(self, docs, find_stopwords=True):
         normalized_docs = [self.normalize(doc) for doc in docs]
+        if find_stopwords:
+            self.stopwords_freq = self.find_stopwords(normalized_docs)
+            self.stopwords = self.stopwords_freq.keys()
+        processed_docs = [self.remove_stopwords(normalized_doc) for normalized_doc in normalized_docs]
+        return processed_docs
 
-        stop_words = self.find_stop_words(normalized_docs)
-
-        final_docs = [self.remove_stopwords(stop_words, normalized_doc) for normalized_doc in normalized_docs]
-
-        return final_docs, stop_words
-
-    def find_stop_words(self, normalized_docs):
-
+    def find_stopwords(self, normalized_docs):
         total_word_count = 0
         word_freq = {}
         word_freq = defaultdict(lambda: 0, word_freq)
@@ -50,17 +51,21 @@ class EnglishProcessor:
                 word_freq[word] += 1
                 total_word_count += 1
 
-        stop_word_count = total_word_count // 100
-        stop_words = [(word, count) for word, count in word_freq.items() if count > stop_word_count]
+        stopwords_count = total_word_count // 100
+        stop_words = {word: count for word, count in word_freq.items() if count > stopwords_count}
 
-        print("Total word count = {}, stop word count threshold = {}".format(total_word_count, stop_word_count))
+        print("Total word count = {}, stop word count threshold = {}".format(total_word_count, stopwords_count))
         return stop_words
 
-    def remove_stopwords(self, stopwords, token_list):
-        return [token for token in token_list if token not in stopwords]
+    def remove_stopwords(self, token_list):
+        return [token for token in token_list if token not in self.stopwords]
 
 
 class PersianProcessor:
+
+    def __init__(self):
+        self.stopwords_freq = {}
+        self.stopwords = []
 
     def normalize(self, sentence):
         return self.stem(self.tokenize(self.remove_puncts(hazm.Normalizer().normalize(sentence))))
@@ -75,14 +80,15 @@ class PersianProcessor:
         stemmer = hazm.Stemmer()
         return [stemmer.stem(token) for token in token_list]
 
-    def remove_stopwords(self, token_list, stopwords):
-        return [token for token in token_list if token not in stopwords]
+    def remove_stopwords(self, token_list):
+        return [token for token in token_list if token not in self.stopwords]
 
     def process_docs(self, docs):
         processed_docs = [self.normalize(doc) for doc in docs]
-        stopwords = self.find_stopwords(processed_docs)
-        processed_docs = [self.remove_stopwords(doc, stopwords.keys()) for doc in processed_docs]
-        return processed_docs, stopwords
+        self.stopwords_freq = self.find_stopwords(processed_docs)
+        self.stopwords = self.stopwords_freq.keys()
+        processed_docs = [self.remove_stopwords(doc) for doc in processed_docs]
+        return processed_docs
 
     def find_stopwords(self, docs):
         word_freq = {}
