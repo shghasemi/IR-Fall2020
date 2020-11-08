@@ -1,6 +1,6 @@
 from compressor import Compressor
 import pickle
-import sys
+import os
 
 
 class PositionalIndex:
@@ -64,17 +64,30 @@ class PositionalIndex:
                     self.index[term][doc_id] = Compressor.gamma_decode(compresses_index[term][doc_id])
 
     def save(self):
-        with open('index/' + self.name + '.pkl', 'wb') as f:
+        with open('index/compressed_' + self.name + '.pkl', 'wb') as f:
             pickle.dump(self.compress(), f, pickle.HIGHEST_PROTOCOL)
 
     def load(self):
-        with open('index/' + self.name + '.pkl', 'rb') as f:
+        with open('index/compressed_' + self.name + '.pkl', 'rb') as f:
             compressed_index = pickle.load(f)
             self.decompress(compressed_index)
 
+    def compare_memory(self):
+        with open('compressor_files/compressed_idx.pkl', 'wb') as f:
+            pickle.dump(self.compress(), f, pickle.HIGHEST_PROTOCOL)
+        with open('compressor_files/raw_idx.pkl', 'wb') as f:
+            pickle.dump(self.index, f, pickle.HIGHEST_PROTOCOL)
+        print("before compression: " + str(
+        os.stat('compressor_files/raw_idx.pkl').st_size
+        ))
+        print("after compression: " + str(
+            os.stat('compressor_files/compressed_idx.pkl').st_size
+        ))
+
 # test
-# pi = PositionalIndex("test",
-#                      [["hello", "world", "!"]*1000, ["fuck", "you"], ["hello"]])
+pi = PositionalIndex("test",
+                     [["hello", "world", "!"]*1000, ["fuck", "you"], ["hello"]])
+pi.compare_memory()
 # cpi = pi.compress("gamma")
 # print(cpi)
 # pi.decompress(cpi, "gamma")

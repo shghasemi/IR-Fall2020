@@ -105,7 +105,6 @@ class Compressor:
         codes_str_len = len(codes_str)
         pos = 0
         gaps = []
-        # for i in range(4):
         while pos < codes_str_len:
             counter = 0
             while codes_str[pos + counter] == '1':
