@@ -83,10 +83,11 @@ class PersianProcessor:
     def remove_stopwords(self, token_list):
         return [token for token in token_list if token not in self.stopwords]
 
-    def process_docs(self, docs):
+    def process_docs(self, docs, find_stopwords=True):
         processed_docs = [self.normalize(doc) for doc in docs]
-        self.stopwords_freq = self.find_stopwords(processed_docs)
-        self.stopwords = self.stopwords_freq.keys()
+        if find_stopwords:
+            self.stopwords_freq = self.find_stopwords(processed_docs)
+            self.stopwords = self.stopwords_freq.keys()
         processed_docs = [self.remove_stopwords(doc) for doc in processed_docs]
         return processed_docs
 

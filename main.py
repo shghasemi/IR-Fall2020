@@ -1,9 +1,9 @@
 import pandas as pd
-from processor import EnglishProcessor
-from processor import PersianProcessor
+from processor import EnglishProcessor, PersianProcessor
 import os
 import xml.etree.ElementTree as ElementTree
 from PositionalIndex import PositionalIndex
+from tf_idf_search import tf_idf_search
 from edit_query import edit_query
 
 
@@ -21,6 +21,9 @@ class InformationRetrieval():
         else:
             self.read_persian_data()
             self.pi = PositionalIndex('persian pi', self.processed_docs)
+            print(self.pi.index.keys())
+            # tf = log_tf_vector(self.processed_docs[0], list(self.pi.index.keys()))
+            # print(tf, normalize_vector(tf), sep='\n')
 
     def read_persian_data(self):
         docs = self.read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
@@ -40,16 +43,24 @@ class InformationRetrieval():
 
 
 if __name__ == '__main__':
-    ir = InformationRetrieval('english')
+    ir = InformationRetrieval('persian')
     # print(ir.processor.stopwords_freq)
 
 
 
     # Edit query
-    print("Please enter a wrong query :)")
-    query = input()
+    # print("Please enter a wrong query :)")
+    # query = input()
+    # processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
+    # edited_query = edit_query(ir.pi.index.keys(), processed_query)
+    # print("Initial query: ", query)
+    # print("Processed query: ", processed_query)
+    # print("Edited query: ", edited_query)
+
+    # tf_idf_search
+    # print("Please enter a right query :)")
+    # query = input()
+    query = 'بازی'
     processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
-    edited_query = edit_query(ir.pi.index.keys(), processed_query)
-    print("Initial query: ", query)
-    print("Processed query: ", processed_query)
-    print("Edited query: ", edited_query)
+    print(tf_idf_search(10, processed_query, ir.processed_docs, ir.pi.index))
+
