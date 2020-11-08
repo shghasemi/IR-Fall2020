@@ -39,13 +39,12 @@ class InformationRetrieval():
         docs = [page.find(f'{namespace}revision/{namespace}text').text for page in root.findall(namespace + 'page')]
         return docs
 
-
 if __name__ == '__main__':
     ir = InformationRetrieval('english')
     # ir = InformationRetrieval('persian')
-    print(ir.processor.stopwords_freq)
-    doc_id_list = list(range(len(ir.processed_docs)))
-    n = len(doc_id_list)
+    # print(ir.processor.stopwords_freq)
+    # doc_id_list = list(range(len(ir.processed_docs)))
+    # n = len(doc_id_list)
 
     # Edit query
     # print("Please enter a wrong query :)")
@@ -66,8 +65,8 @@ if __name__ == '__main__':
 
     # proximity_search
     # query = 'شاهد عینی'
-    query = 'talks about'
-    processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
-    print(processed_query)
-    print(proximity_search(n, doc_id_list, processed_query, ir.pi.index, 3, 10))
+    # query = 'talks about'
+    # processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
+    # print(processed_query)
+    # print(proximity_search(n, doc_id_list, processed_query, ir.pi.index, 3, 10))
 
