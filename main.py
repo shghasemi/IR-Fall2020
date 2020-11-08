@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ElementTree
 from PositionalIndex import PositionalIndex
 from tf_idf_search import tf_idf_search
 from edit_query import edit_query
+from proximity_search import proximity_search
 
 
 class InformationRetrieval():
@@ -40,10 +41,11 @@ class InformationRetrieval():
 
 
 if __name__ == '__main__':
-    ir = InformationRetrieval('persian')
-    # print(ir.processor.stopwords_freq)
-
-
+    ir = InformationRetrieval('english')
+    # ir = InformationRetrieval('persian')
+    print(ir.processor.stopwords_freq)
+    doc_id_list = list(range(len(ir.processed_docs)))
+    n = len(doc_id_list)
 
     # Edit query
     # print("Please enter a wrong query :)")
@@ -57,7 +59,15 @@ if __name__ == '__main__':
     # tf_idf_search
     # print("Please enter a right query :)")
     # query = input()
-    query = 'بازی'
+    # query = 'بازی'
+    # query = 'talk'
+    # processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
+    # print(tf_idf_search(n, doc_id_list, processed_query, ir.pi.index, 10))
+
+    # proximity_search
+    # query = 'شاهد عینی'
+    query = 'talks about'
     processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
-    print(tf_idf_search(10, processed_query, ir.processed_docs, ir.pi.index))
+    print(processed_query)
+    print(proximity_search(n, doc_id_list, processed_query, ir.pi.index, 3, 10))
 
