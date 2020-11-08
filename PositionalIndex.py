@@ -1,4 +1,6 @@
 from compressor import Compressor
+import pickle
+import sys
 
 
 class PositionalIndex:
@@ -61,10 +63,18 @@ class PositionalIndex:
                 else:
                     self.index[term][doc_id] = Compressor.gamma_decode(compresses_index[term][doc_id])
 
+    def save(self):
+        with open('index/' + self.name + '.pkl', 'wb') as f:
+            pickle.dump(self.compress(), f, pickle.HIGHEST_PROTOCOL)
+
+    def load(self):
+        with open('index/' + self.name + '.pkl', 'rb') as f:
+            compressed_index = pickle.load(f)
+            self.decompress(compressed_index)
+
 # test
 # pi = PositionalIndex("test",
-#                      [["hello", "world", "!"], ["fuck", "you"], ["hello"]])
-# print(pi.index)
+#                      [["hello", "world", "!"]*1000, ["fuck", "you"], ["hello"]])
 # cpi = pi.compress("gamma")
 # print(cpi)
 # pi.decompress(cpi, "gamma")

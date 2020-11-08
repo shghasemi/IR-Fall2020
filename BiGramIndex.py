@@ -1,3 +1,5 @@
+import pickle
+
 class BiGramIndex:
     def __init__(self, name, docs):
         self.name = name
@@ -33,6 +35,13 @@ class BiGramIndex:
     def show_tokens_contain_bigram(self, bigram):
         print(self.index[bigram].keys())
 
+    def save(self):
+        with open('index/' + self.name + '.pkl', 'wb') as f:
+            pickle.dump(self.index, f, pickle.HIGHEST_PROTOCOL)
+
+    def load(self):
+        with open('index/' + self.name + '.pkl', 'rb') as f:
+            self.index = pickle.load(f)
 
 # bi = BiGramIndex("test",
 #                      [["hello", "world", "!"], ["fuck", "you"], ["hello"], ["ololo"]])
