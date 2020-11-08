@@ -35,23 +35,23 @@ def normalize_vector(vec):
     return vec / c if c else vec
 
 
-def query_vector(opt_query, n, dictionary, pos_idx):
-    tf = log_tf_vector(opt_query, dictionary)
-    idf = idf_vector(n, dictionary, pos_idx)
+def query_vector(opt_query, dictionary):
+    return normalize_vector(log_tf_vector(opt_query, dictionary))
+
+
+def doc_vector(doc, dictionary, idf, pos_idx):
+    tf = log_tf_vector_doc(doc, dictionary, pos_idx)
     return normalize_vector(tf * idf)
-
-
-def doc_vector(doc, dictionary, pos_idx):
-    return normalize_vector(log_tf_vector_doc(doc, dictionary, pos_idx))
 
 
 def tf_idf_search(k, opt_query, processed_docs, pos_idx):
     n = len(processed_docs)
     dictionary = list(pos_idx.keys())
-    q_vec = query_vector(opt_query, n, dictionary, pos_idx)
+    q_vec = query_vector(opt_query, dictionary)
+    idf = idf_vector(n, dictionary, pos_idx)
     scores = []
     for doc_id in range(len(processed_docs)):
-        d_vec = doc_vector(doc_id, dictionary, pos_idx)
+        d_vec = doc_vector(doc_id, dictionary, idf, pos_idx)
         scores.append((doc_id, q_vec.dot(d_vec)))
     ranked_docs = sorted(scores, key=lambda x: x[1], reverse=True)
     return ranked_docs[:min(k, len(ranked_docs))]

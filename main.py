@@ -21,9 +21,6 @@ class InformationRetrieval():
         else:
             self.read_persian_data()
             self.pi = PositionalIndex('persian pi', self.processed_docs)
-            print(self.pi.index.keys())
-            # tf = log_tf_vector(self.processed_docs[0], list(self.pi.index.keys()))
-            # print(tf, normalize_vector(tf), sep='\n')
 
     def read_persian_data(self):
         docs = self.read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
