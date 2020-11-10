@@ -22,11 +22,13 @@ class InformationRetrieval():
         else:
             self.read_persian_data()
             self.pi = PositionalIndex('persian pi', self.processed_docs)
+            self.tpi = PositionalIndex('title persian pi', self.title_processed_docs)
 
     def read_persian_data(self):
-        docs = self.read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
+        docs, titles = self.read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
         self.processor = PersianProcessor()
         self.processed_docs = self.processor.process_docs(docs)
+        self.title_processed_docs = self.processor.process_docs(titles, find_stopwords=False)
 
     def read_english_data(self):
         doc = pd.read_csv(os.path.join('data', 'ted_talks.csv'))
@@ -37,14 +39,18 @@ class InformationRetrieval():
     def read_xml(self, path, namespace):
         root = ElementTree.parse(path).getroot()
         docs = [page.find(f'{namespace}revision/{namespace}text').text for page in root.findall(namespace + 'page')]
-        return docs
+        titles = [page.find(f'{namespace}revision/{namespace}title').text for page in root.findall(namespace + 'page')]
+        return docs, titles
+
 
 if __name__ == '__main__':
     ir = InformationRetrieval('english')
     # ir = InformationRetrieval('persian')
     # print(ir.processor.stopwords_freq)
-    # doc_id_list = list(range(len(ir.processed_docs)))
-    # n = len(doc_id_list)
+    doc_id_list = list(range(len(ir.processed_docs)))
+    n = len(doc_id_list)
+    k = 10
+    w = 3
 
     # Edit query
     # print("Please enter a wrong query :)")
@@ -65,8 +71,12 @@ if __name__ == '__main__':
 
     # proximity_search
     # query = 'شاهد عینی'
-    # query = 'talks about'
-    # processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
-    # print(processed_query)
-    # print(proximity_search(n, doc_id_list, processed_query, ir.pi.index, 3, 10))
+    query = 'talks'
+    processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
+    print(processed_query)
+
+    retrieved = tf_idf_search(n, doc_id_list, processed_query, ir.pi.index, k)
+    # retrieved = proximity_search(n, doc_id_list, processed_query, ir.pi.index, w, k)
+    for i, (doc_id, score) in enumerate(retrieved):
+        print(f'{i + 1:2d}. ID: {doc_id:5d}, Score: {score:.4f}')
 
