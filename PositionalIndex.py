@@ -4,18 +4,19 @@ import os
 
 
 class PositionalIndex:
-    def __init__(self, name, docs):
+    def __init__(self, name, docs, ids):
         self.index = dict()
         self.name = name
-        self.build(docs)
+        self.build(docs, ids)
 
-    def build(self, docs):
+    def build(self, docs, ids):
         """
         :param docs: list of docs
         each doc is a list of normalized term
+        :param ids: list of doc ids
         :return:
         """
-        for doc_id, doc_info in enumerate(docs):
+        for doc_id, doc_info in zip(ids, docs):
             self.add_new_doc(doc_id, doc_info)
 
     def add_new_doc(self, doc_id, doc):
@@ -85,9 +86,9 @@ class PositionalIndex:
         ))
 
 # test
-pi = PositionalIndex("test",
-                     [["hello", "world", "!"]*1000, ["fuck", "you"], ["hello"]])
-pi.compare_memory()
+# pi = PositionalIndex("test",
+#                      [["hello", "world", "!"]*1000, ["fuck", "you"], ["hello"]])
+# pi.compare_memory()
 # cpi = pi.compress("gamma")
 # print(cpi)
 # pi.decompress(cpi, "gamma")
