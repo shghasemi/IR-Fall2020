@@ -53,7 +53,6 @@ class EnglishProcessor:
 
         stopwords_count = total_word_count // 100
         stop_words = {word: count for word, count in word_freq.items() if count > stopwords_count}
-
         print("Total word count = {}, stop word count threshold = {}".format(total_word_count, stopwords_count))
         return stop_words
 
@@ -68,13 +67,13 @@ class PersianProcessor:
         self.stopwords = []
 
     def normalize(self, sentence):
-        return self.stem(self.tokenize(self.remove_puncts(hazm.Normalizer().normalize(sentence))))
+        return self.stem(self.tokenize(hazm.Normalizer().normalize(self.remove_puncts(sentence))))
 
     def tokenize(self, sentence):
         return hazm.word_tokenize(sentence)
 
     def remove_puncts(self, sentence):
-        return re.sub(r'[^\w\s]', '', re.sub(r'[a-zA-Z_]', '', re.sub(r'[۰-۹0-9]', ' ', sentence)))
+        return re.sub(r'[^\w\s]', ' ', re.sub(r'[a-zA-Z_]', ' ', re.sub(r'[۰-۹0-9]', ' ', sentence)))
 
     def stem(self, token_list):
         stemmer = hazm.Stemmer()
@@ -96,6 +95,8 @@ class PersianProcessor:
         for doc in docs:
             for word in doc:
                 word_freq[word] = 1 if word not in word_freq else word_freq[word] + 1
-        thr = sum(word_freq.values()) * 0.008
+        n = sum(word_freq.values())
+        thr = n * 0.004
+        print("Total word count = {}, stop word count threshold = {}".format(n, thr))
         stopwords = {word: freq for word, freq in word_freq.items() if freq >= thr}
         return stopwords

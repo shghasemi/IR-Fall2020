@@ -3,7 +3,7 @@ import numpy as np
 
 def tf_vector(query, dictionary):
     vec = np.zeros(len(dictionary))
-    for i, token in enumerate(query):
+    for token in query:
         if token in dictionary:
             vec[dictionary.index(token)] += 1
     return vec
@@ -12,14 +12,14 @@ def tf_vector(query, dictionary):
 def log_tf_vector(query, dictionary):
     vec = tf_vector(query, dictionary)
     non_zero = vec != 0
-    vec[non_zero] = 1 + np.log(vec[non_zero])
+    vec[non_zero] = 1 + np.log10(vec[non_zero])
     return vec
 
 
 def log_tf_vector_doc(doc_id, dictionary, pos_idx):
     vec = np.array([len(pos_idx[token].get(doc_id, [])) for token in dictionary], dtype=np.float)
     non_zero = vec != 0
-    vec[non_zero] = 1 + np.log(vec[non_zero])
+    vec[non_zero] = 1 + np.log10(vec[non_zero])
     return vec
 
 
@@ -27,12 +27,12 @@ def idf_vector(n, dictionary, pos_idx):
     vec = np.array([len(pos_idx[token]) for token in dictionary], dtype=np.float)
     non_zero = vec != 0
     if n:
-        vec[non_zero] = np.log(n / vec[non_zero])
+        vec[non_zero] = np.log10(n / vec[non_zero])
     return vec
 
 
 def normalize_vector(vec):
-    c = np.sum(vec * vec)
+    c = np.sqrt(np.sum(vec * vec))
     return vec / c if c else vec
 
 
