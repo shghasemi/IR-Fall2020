@@ -1,18 +1,20 @@
 import pickle
 
+
 class BiGramIndex:
-    def __init__(self, name, docs):
+    def __init__(self, name, docs, ids):
         self.name = name
         self.index = {}
-        self.build(docs)
+        self.build(docs, ids)
 
-    def build(self, docs):
+    def build(self, docs, ids):
         """
         :param docs: list of docs
         each doc is a list of tokens
+        :param ids: list of doc ids
         :return:
         """
-        for doc_id, doc in enumerate(docs):
+        for doc_id, doc in zip(ids, docs):
             for token in doc:
                 self.add_token(doc_id, token)
 
