@@ -59,6 +59,9 @@ if __name__ == '__main__':
     n = len(doc_id_list)
     k = 10
     w = 3
+    # print(ir.pi.index.get('جورج', None))
+    # print(ir.processed_docs[ir.doc_ids.index(3320)])
+    # ir.bi.show_tokens_contain_bigram('جت')
 
     # Edit query
     # print("Please enter a wrong query :)")
@@ -82,7 +85,9 @@ if __name__ == '__main__':
     print(f'Top {len(retrieved)} doc using tf-idf search:')
     for i, (doc_id, score) in enumerate(retrieved):
         print(f'{i + 1:2d}. ID: {doc_id:5d}, Score: {score:.4f}')
+        print(ir.processed_docs[ir.doc_ids.index(doc_id)])
     retrieved = proximity_search(n, doc_id_list, processed_query, ir.pi.index, w, k)
     print(f'Top {len(retrieved)} doc using proximity search - window size = {w}:')
     for i, (doc_id, score) in enumerate(retrieved):
         print(f'{i + 1:2d}. ID: {doc_id:5d}, Score: {score:.4f}')
+        print(ir.processed_docs[ir.doc_ids.index(doc_id)])
