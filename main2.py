@@ -76,6 +76,10 @@ if __name__ == '__main__':
     # nb_clf.fit(X_train, y_train)
     # predicted_val_y = nb_clf.predict(X_val)
     # print(sum(abs(y_val - predicted_val_y)) / 2)
+    # print(evaluate(y_val, predicted_val_y))
+
+    # predicted_val_y = nb_clf.predict(X_train)
+    # print(sum(abs(y_train - predicted_val_y)) / 2)
 #     X_train, y_train = read_text_file('data/phase2_train.csv')
 #     X_test, y_test = read_text_file('data/phase2_test.csv')
 #
@@ -107,7 +111,7 @@ if __name__ == '__main__':
 #     # X_train = tfidf_transformer.transform(docs)
 #     # X_test = tfidf_transformer.transform(docs_test)
 
-if __name__ == '__main__':
-    X_train, X_test = build_X()
-    print(X_train[1:5, ])
-    print(X_train.shape, X_test.shape)
+# if __name__ == '__main__':
+#     X_train, X_test = build_X()
+#     print(X_train[1:5, ])
+#     print(X_train.shape, X_test.shape)
