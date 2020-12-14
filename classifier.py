@@ -1,11 +1,17 @@
 import numpy as np
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 
 
 class KNNClassifier:
-    def __init__(self, k, X_train, y_train):
+    def __init__(self, k):
         self.k = k
-        self.X_train = X_train
-        self.y_train = y_train
+        self.X_train = None
+        self.y_train = None
+
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
 
     @staticmethod
     def majority(lst):
@@ -23,3 +29,42 @@ class KNNClassifier:
     def predict(self, X_test):
         y_pred = [self.majority(self.neighbors(x)) for x in X_test]
         return np.array(y_pred)
+
+
+class NaiveBayesClassifier:
+    pass
+
+class SVMClassifier:
+    def __init__(self, C):
+        self.C = C
+        self.X_train = None
+        self.y_train = None
+        self.clf = SVC(C=C)
+
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
+        self.clf.fit(X, y)
+
+    def predict(self, X_test):
+        y_pred = self.clf.predict(X_test)
+        return y_pred
+
+class RandomForest:
+    def __init__(self):
+        self.X_train = None
+        self.y_train = None
+        self.clf = RandomForestClassifier()
+        
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
+        self.clf.fit(X, y)
+
+    def predict(self, X_test):
+        y_pred = self.clf.predict(X_test)
+        return y_pred
+
+
+
+
