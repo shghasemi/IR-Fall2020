@@ -7,10 +7,11 @@ from PositionalIndex import PositionalIndex
 from processor import EnglishProcessor
 from tf_idf_search import idf_vector
 
+from classifier import NaiveBayesClassifier
 
-def read_data(processor, file='ted_talks'):
+def read_data(processor, path, file='ted_talks'):
     is_ted = file == 'ted_talks'
-    doc = pd.read_csv(os.path.join('data', f'{file}.csv'))
+    doc = pd.read_csv(os.path.join(path, f'{file}.csv'))
     processed_docs = processor.process_docs(doc['description'], find_stopwords=is_ted)
     processed_titles = processor.process_docs(doc['title'], find_stopwords=False)
     doc_ids = list(range(len(processed_docs)))
@@ -33,17 +34,17 @@ def doc2vec(doc_id_list, dictionary, pos_idx):
     return np.array(X)
 
 
-def build_X():
+def build_X(path):
     processor = EnglishProcessor()
     # Find dictionary
-    _, _, pi_complete = read_data(processor, 'ted_talks')
+    _, _, pi_complete = read_data(processor, path=path, file='ted_talks')
     dictionary = pi_complete.index.keys()
     # build train and test matrices
-    ids_train, y_train, pi_train = read_data(processor, 'train')
-    ids_test, y_test, pi_test = read_data(processor, 'test')
+    ids_train, y_train, pi_train = read_data(processor, path=path, file='train')
+    ids_test, y_test, pi_test = read_data(processor, path=path, file='test')
     X_train = doc2vec(ids_train, dictionary, pi_train.index)
     X_test = doc2vec(ids_test, dictionary, pi_test.index)
-    return X_train, X_test
+    return X_train, X_test, y_train, y_test
 
 
 def evaluate(y_true, y_pred):
@@ -58,7 +59,23 @@ def evaluate(y_true, y_pred):
     # sensitivity = TP / (TP + FN)
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    datapath = ""
+    X_train_val, X_test, y_train_val, y_test = build_X(datapath)
+    print("X_train_val shape: {}, X_test shape: {}".format(X_train_val.shape, X_test.shape))
+    print("y_train_val shape: {}, y_test shape: {}".format(y_train_val.shape, y_test.shape))
+    np.random.shuffle(X_train_val)
+    val_count = X_train_val.shape[0] // 10
+    X_val = X_train_val[:val_count, :]
+    y_val = y_train_val[:val_count]
+    X_train = X_train_val[val_count:, :]
+    y_train = y_train_val[val_count:]
+    print("X_train shape: {}, X_val shape: {}".format(X_train.shape, X_val.shape))
+    print("y_train shape: {}, y_val shape: {}".format(y_train.shape, y_val.shape))
+    # nb_clf = NaiveBayesClassifier()
+    # nb_clf.fit(X_train, y_train)
+    # predicted_val_y = nb_clf.predict(X_val)
+    # print(sum(abs(y_val - predicted_val_y)) / 2)
 #     X_train, y_train = read_text_file('data/phase2_train.csv')
 #     X_test, y_test = read_text_file('data/phase2_test.csv')
 #
