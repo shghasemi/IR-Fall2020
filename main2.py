@@ -8,12 +8,13 @@ from processor import EnglishProcessor
 from tf_idf_search import idf_vector
 
 
-def read_data(processor, file='train'):
+def read_data(processor, file='ted_talks'):
+    is_ted = file == 'ted_talks'
     doc = pd.read_csv(os.path.join('data', f'{file}.csv'))
-    processed_docs = processor.process_docs(doc['description'], find_stopwords=file == 'train')
+    processed_docs = processor.process_docs(doc['description'], find_stopwords=is_ted)
     processed_titles = processor.process_docs(doc['title'], find_stopwords=False)
     doc_ids = list(range(len(processed_docs)))
-    y = doc['views']
+    y = doc['views'] if not is_ted else None
     # positional index
     pi = PositionalIndex(f'{file}_pi', processed_docs, doc_ids)
     pi.build(processed_titles, doc_ids)
@@ -21,12 +22,11 @@ def read_data(processor, file='train'):
 
 
 def doc_vector_ntn(doc, dictionary, pos_idx, idf):
-    tf = np.array([len(pos_idx[token].get(doc, [])) for token in dictionary], dtype=np.float)
+    tf = np.array([len(pos_idx.get(token, {}).get(doc, [])) for token in dictionary], dtype=np.float)
     return tf * idf
 
 
-def doc2vec(doc_id_list, pos_idx):
-    dictionary = list(pos_idx.keys())
+def doc2vec(doc_id_list, dictionary, pos_idx):
     n = len(doc_id_list)
     idf = idf_vector(n, dictionary, pos_idx)
     X = [doc_vector_ntn(doc, dictionary, pos_idx, idf) for doc in doc_id_list]
@@ -35,10 +35,14 @@ def doc2vec(doc_id_list, pos_idx):
 
 def build_X():
     processor = EnglishProcessor()
+    # Find dictionary
+    _, _, pi_complete = read_data(processor, 'ted_talks')
+    dictionary = pi_complete.index.keys()
+    # build train and test matrices
     ids_train, y_train, pi_train = read_data(processor, 'train')
     ids_test, y_test, pi_test = read_data(processor, 'test')
-    X_train = doc2vec(ids_train, pi_train.index)
-    X_test = doc2vec(ids_test, pi_test.index)
+    X_train = doc2vec(ids_train, dictionary, pi_train.index)
+    X_test = doc2vec(ids_test, dictionary, pi_test.index)
     return X_train, X_test
 
 

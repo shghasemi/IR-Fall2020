@@ -24,7 +24,7 @@ def log_tf_vector_doc(doc_id, dictionary, pos_idx):
 
 
 def idf_vector(n, dictionary, pos_idx):
-    vec = np.array([len(pos_idx[token]) for token in dictionary], dtype=np.float)
+    vec = np.array([len(pos_idx.get(token, {})) for token in dictionary], dtype=np.float)
     non_zero = vec != 0
     if n:
         vec[non_zero] = np.log10(n / vec[non_zero])
