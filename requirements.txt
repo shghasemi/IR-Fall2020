@@ -2,3 +2,4 @@ nltk
 hazm
 pandas
 numpy
+sklearn
