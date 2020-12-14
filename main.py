@@ -1,12 +1,10 @@
 import pandas as pd
 
-from BiGramIndex import BiGramIndex
 from processor import EnglishProcessor, PersianProcessor
 import os
 import xml.etree.ElementTree as ElementTree
 from PositionalIndex import PositionalIndex
 from tf_idf_search import tf_idf_search
-from edit_query import edit_query
 from proximity_search import proximity_search
 
 
@@ -24,9 +22,6 @@ class InformationRetrieval:
         # positional index
         self.pi = PositionalIndex('description ' + self.lang + ' pi', self.processed_docs, self.doc_ids)
         self.tpi = PositionalIndex('title ' + self.lang + ' pi', self.title_processed_docs, self.doc_ids)
-        # bigram index
-        self.bi = BiGramIndex('description ' + self.lang + ' bi', self.processed_docs, self.doc_ids)
-        self.tbi = BiGramIndex('title ' + self.lang + ' bi', self.title_processed_docs, self.doc_ids)
 
     def read_persian_data(self):
         docs, titles, ids = self.read_xml('./data/Persian.xml', '{http://www.mediawiki.org/xml/export-0.10/}')
@@ -52,33 +47,13 @@ class InformationRetrieval:
 
 
 if __name__ == '__main__':
-    # ir = InformationRetrieval('english')
     ir = InformationRetrieval('persian')
     print(ir.processor.stopwords_freq)
     doc_id_list = ir.doc_ids
     n = len(doc_id_list)
     k = 10
     w = 3
-    # print(ir.pi.index.get('جورج', None))
-    # print(ir.processed_docs[ir.doc_ids.index(3320)])
-    # ir.bi.show_tokens_contain_bigram('جت')
-
-    # Edit query
-    # print("Please enter a wrong query :)")
-    # query = input()
-    # processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
-    # edited_query = edit_query(ir.pi.index.keys(), processed_query)
-    # print("Initial query: ", query)
-    # print("Processed query: ", processed_query)
-    # print("Edited query: ", edited_query)
-
-    # search
-    # query = 'شاهد عینی'
     query = 'امتداد کوه'
-    # query = 'health overpopulation charmingly'
-    # query = 'greatest gift ever'
-    # query = 'My informatoin about thos'
-    # query = 'talks'
     processed_query = ir.processor.process_docs([query], find_stopwords=False)[0]
     print(processed_query)
     retrieved = tf_idf_search(n, doc_id_list, processed_query, ir.pi.index, k)

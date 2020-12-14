@@ -37,8 +37,6 @@ class PositionalIndex:
             print(str(doc_id) + " : " + str(positions))
 
 
-    # TODO: add load & save methods
-
     def show_position(self, term, doc_id):
         print(self.name + " positional index")
         print(self.index[term][doc_id])
@@ -84,12 +82,3 @@ class PositionalIndex:
         print("after compression: " + str(
             os.stat('compressor_files/compressed_idx.pkl').st_size
         ))
-
-# test
-# pi = PositionalIndex("test",
-#                      [["hello", "world", "!"]*1000, ["fuck", "you"], ["hello"]])
-# pi.compare_memory()
-# cpi = pi.compress("gamma")
-# print(cpi)
-# pi.decompress(cpi, "gamma")
-# print(pi.index)
