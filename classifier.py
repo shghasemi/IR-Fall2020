@@ -2,10 +2,14 @@ import numpy as np
 
 
 class KNNClassifier:
-    def __init__(self, k, X_train, y_train):
+    def __init__(self, k):
         self.k = k
-        self.X_train = X_train
-        self.y_train = y_train
+        self.X_train = None
+        self.y_train = None
+
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
 
     @staticmethod
     def majority(lst):
