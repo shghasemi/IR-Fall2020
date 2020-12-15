@@ -3,12 +3,14 @@ import pandas as pd
 from sklearn import metrics
 import os
 
+from sklearn.model_selection import train_test_split
+
 from PositionalIndex import PositionalIndex
 from processor import EnglishProcessor
 from proximity_search import proximity_search
 from tf_idf_search import idf_vector, tf_idf_search
 from InformationRetrieval import InformationRetrieval
-from classifier import NaiveBayesClassifier
+from classifier import NaiveBayesClassifier, KNNClassifier
 
 
 def read_data(processor, path, file='ted_talks'):
@@ -29,9 +31,7 @@ def doc_vector_ntn(doc, dictionary, pos_idx, idf):
     return tf * idf
 
 
-def doc2vec(doc_id_list, dictionary, pos_idx):
-    n = len(doc_id_list)
-    idf = idf_vector(n, dictionary, pos_idx)
+def doc2vec(doc_id_list, dictionary, pos_idx, idf):
     X = [doc_vector_ntn(doc, dictionary, pos_idx, idf) for doc in doc_id_list]
     return np.array(X)
 
@@ -40,13 +40,15 @@ def build_X(path):
     processor = EnglishProcessor()
     # Find dictionary
     ids_ted, _, pi_ted = read_data(processor, path=path, file='ted_talks')
-    dictionary = pi_ted.index.keys()
-    # build train and test matrices
     ids_train, y_train, pi_train = read_data(processor, path=path, file='train')
     ids_test, y_test, pi_test = read_data(processor, path=path, file='test')
-    X_train = doc2vec(ids_train, dictionary, pi_train.index)
-    X_test = doc2vec(ids_test, dictionary, pi_test.index)
-    X_ted = doc2vec(ids_ted, dictionary, pi_ted.index)
+    dictionary = pi_train.index.keys()
+    # build ted, train, and test matrices
+    idf = idf_vector(len(ids_train), dictionary, pi_train.index)
+    X_train = doc2vec(ids_train, dictionary, pi_train.index, idf)
+    X_test = doc2vec(ids_test, dictionary, pi_test.index, idf)
+    X_ted = doc2vec(ids_ted, dictionary, pi_ted.index, idf)
+    print(X_ted[X_ted != 0])
     return X_train, X_test, y_train, y_test, ids_ted, X_ted
 
 
@@ -92,21 +94,22 @@ def test_search(ir, doc_ids, proximity=False, search_title=False):
         print(f'{i + 1:2d}. ID: {doc_id:5d}, Score: {score:.5f}')
         print(docs[ir.doc_ids.index(doc_id)])
 
+
 if __name__ == '__main__':
     datapath = "data"
     X_train_val, X_test, y_train_val, y_test, ted_ids, X_ted = build_X(datapath)
     print("X_train_val shape: {}, X_test shape: {}".format(X_train_val.shape, X_test.shape))
     print("y_train_val shape: {}, y_test shape: {}".format(y_train_val.shape, y_test.shape))
-    np.random.shuffle(X_train_val)
-    val_count = X_train_val.shape[0] // 10
-    X_val = X_train_val[:val_count, :]
-    y_val = y_train_val[:val_count]
-    X_train = X_train_val[val_count:, :]
-    y_train = y_train_val[val_count:]
+    X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.1, random_state=42)
     print("X_train shape: {}, X_val shape: {}".format(X_train.shape, X_val.shape))
     print("y_train shape: {}, y_val shape: {}".format(y_train.shape, y_val.shape))
 
     nb_clf = NaiveBayesClassifier()
+    nb_clf.fit(X_train, y_train)
+    predicted_y = nb_clf.predict(X_test)
+    evaluate(y_test, predicted_y)
+
+    nb_clf = KNNClassifier(1)
     nb_clf.fit(X_train, y_train)
     predicted_y = nb_clf.predict(X_test)
     evaluate(y_test, predicted_y)
