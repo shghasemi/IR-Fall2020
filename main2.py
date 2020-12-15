@@ -10,7 +10,7 @@ from processor import EnglishProcessor
 from proximity_search import proximity_search
 from tf_idf_search import idf_vector, tf_idf_search
 from InformationRetrieval import InformationRetrieval
-from classifier import NaiveBayesClassifier, KNNClassifier
+from classifier import NaiveBayesClassifier, KNNClassifier, SVMClassifier, RandomForest
 
 
 def read_data(processor, path, file='ted_talks'):
@@ -106,50 +106,31 @@ if __name__ == '__main__':
 
     nb_clf = NaiveBayesClassifier()
     nb_clf.fit(X_train, y_train)
-    predicted_y = nb_clf.predict(X_test)
-    evaluate(y_test, predicted_y)
+    y_pred_val = nb_clf.predict(X_val)
+    y_pred_test = nb_clf.predict(X_test)
+    print('NB validation acc: {}'.format((y_pred_val == y_val).mean()))
+    evaluate(y_test, y_pred_test)
 
-    nb_clf = KNNClassifier(1)
-    nb_clf.fit(X_train, y_train)
-    predicted_y = nb_clf.predict(X_test)
-    evaluate(y_test, predicted_y)
-    # ir = InformationRetrieval('english')
-    # test_search(ir, ted_ids[predicted_y > 0])
-    # test_search(ir, ted_ids[predicted_y < 0])
-    # predicted_val_y = nb_clf.predict(X_train)
-    # print(sum(abs(y_train - predicted_val_y)) / 2)
-#     X_train, y_train = read_text_file('data/phase2_train.csv')
-#     X_test, y_test = read_text_file('data/phase2_test.csv')
-#
-#     print("Please select classifier")
-#     print("1. Naive Bayes")
-#     print("2. k-NN")
-#     print("3. SVM")
-#     print("4. Random Forest")
-#     cls_number = int(input())
-#     set_hypers = True if cls_number >= 3 else False
-#     if cls_number == 2:
-#         learn_k(20, X_train, y_train)
-#     cls = get_classifier(cls_number=cls_number)
-#
-#     # build a pipeline using cls
-#     text_cls, search = build_pipeline(cls, set_hyperparams=set_hypers)
-#     if set_hypers:
-#         search.fit(X_train, y_train)
-#     # print("fit done")
-#     text_cls.fit(X_train, y_train)
-#     y_train_perd = text_cls.predict(X_train)
-#     y_test_pred = text_cls.predict(X_test)
-#     print("Evaluating train data ================")
-#     evaluate(y_train, y_train_perd)
-#     print("Evaluating test data =================")
-#     evaluate(y_test, y_test_pred)
-#
-#     # tfidf_transformer = doc2vec(docs)
-#     # X_train = tfidf_transformer.transform(docs)
-#     # X_test = tfidf_transformer.transform(docs_test)
+    for k in [1, 5, 9]:
+        knn_clf = KNNClassifier(k)
+        knn_clf.fit(X_train, y_train)
+        y_pred_val = knn_clf.predict(X_val)
+        y_pred_test = knn_clf.predict(X_test)
+        print('{}-nn validation acc: {}'.format(k, (y_pred_val == y_val).mean()))
+        evaluate(y_test, y_pred_test)
 
-# if __name__ == '__main__':
-#     X_train, X_test = build_X()
-#     print(X_train[1:5, ])
-#     print(X_train.shape, X_test.shape)
+    c_values = [0.5, 1, 1.5, 2]
+    for C in c_values:
+        svm_clf = SVMClassifier(C=C)
+        svm_clf.fit(X_train, y_train)
+        y_pred_val = svm_clf.predict(X_val)
+        y_pred_test = svm_clf.predict(X_test)
+        print('svm-{} validation acc: {}'.format(C, (y_pred_val == y_val).mean()))
+        evaluate(y_test, y_pred_test)
+
+    random_forest_clf = RandomForest()
+    random_forest_clf.fit(X_train, y_train)
+    y_pred_val = random_forest_clf.predict(X_val)
+    y_pred_test = random_forest_clf.predict(X_test)
+    print('forest validation acc: {}'.format((y_pred_val == y_val).mean()))
+    evaluate(y_test, y_pred_test)
