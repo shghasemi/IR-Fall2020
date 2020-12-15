@@ -27,6 +27,26 @@ class PositionalIndex:
                 self.index[term][doc_id] = []
             self.index[term][doc_id].append(position + 2)
 
+    # def get_classified_indexes(self, doc_label):
+    #     """
+    #     :param doc_label: dictionary
+    #     key: doc_id value: label
+    #     :return:
+    #     class_0_index, class_1_index
+    #     """
+    #     index_c0 = dict()
+    #     index_c1 = dict()
+    #     for term in self.index.keys():
+    #         index_c0[term] = dict()
+    #         index_c1[term] = dict()
+    #         for doc_id in self.index[term]:
+    #             if doc_label[doc_id] == 1:
+    #                 index_c1[term][doc_id] = self.index[term][doc_id]
+    #             else:
+    #                 index_c0[term][doc_id] = self.index[term][doc_id]
+    #     return index_c0, index_c1
+
+
     def delete_doc(self, doc_id):
         for term in self.index.keys():
             self.index[term].pop(doc_id, None)
@@ -35,7 +55,6 @@ class PositionalIndex:
         print(self.name + " positional index")
         for doc_id, positions in self.index[term].items():
             print(str(doc_id) + " : " + str(positions))
-
 
     def show_position(self, term, doc_id):
         print(self.name + " positional index")
