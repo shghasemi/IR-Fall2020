@@ -53,23 +53,18 @@ def build_X(path):
 
 
 def evaluate(y_true, y_pred):
-    # accuracy = np.mean(y_pred == y_true)
-    # print(accuracy)
-    # print(metrics.confusion_matrix(y_true, y_pred))
-    # print(metrics.classification_report(y_true, y_pred, digits=3))
     tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = 2 * precision * recall / (precision + recall)
-    print("Precision: " + str(precision))
-    print("Recall: " + str(recall))
-    print("F1: " + str(f1))
-    # TP = np.sum(np.logical_and(y_true == 1, y_pred == 1))
-    # FP = np.sum(np.logical_and(y_true == 0, y_pred == 1))
-    # TN = np.sum(np.logical_and(y_true == 0, y_pred == 0))
-    # FN = np.sum(np.logical_and(y_true == 1, y_pred == 0))
-    # specifity = TN / (TN + FP)
-    # sensitivity = TP / (TP + FN)
+    precision_t = tp / (tp + fp)
+    precision_n = tn / (tn + fn)
+    recall_t = tp / (tp + fn)
+    recall_n = tn / (tn + fp)
+    f1_t = 2 * precision_t * recall_t / (precision_t + recall_t)
+    f1_n = 2 * precision_n * recall_n / (precision_n + recall_n)
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    print('\tprecision\trecall\t\tf1-score\n')
+    print(f' 1\t{precision_t:0.4f}\t\t{recall_t:0.4f}\t\t{f1_t:0.4f}')
+    print(f'-1\t{precision_n:0.4f}\t\t{recall_n:0.4f}\t\t{f1_n:0.4f}')
+    print(f'\nacc\t{accuracy:0.4f}\n')
 
 
 def test_search(ir, doc_ids, proximity=False, search_title=False):
@@ -101,7 +96,7 @@ def test_search(ir, doc_ids, proximity=False, search_title=False):
         print(f'{i + 1:2d}. ID: {doc_id:5d}, Score: {score:.5f}')
         print(docs[ir.doc_ids.index(doc_id)])
 
-
+from sklearn.neighbors import KNeighborsClassifier
 if __name__ == '__main__':
     datapath = "data"
     X_train_val, X_test, y_train_val, y_test, ted_ids, X_ted = build_X(datapath)
@@ -111,12 +106,11 @@ if __name__ == '__main__':
     print("X_train shape: {}, X_val shape: {}".format(X_train.shape, X_val.shape))
     print("y_train shape: {}, y_val shape: {}".format(y_train.shape, y_val.shape))
 
-    nb_clf = NaiveBayesClassifier()
-    nb_clf.fit(X_train, y_train)
-    y_pred_val = nb_clf.predict(X_val)
-    y_pred_test = nb_clf.predict(X_test)
-    print('NB validation acc: {}'.format((y_pred_val == y_val).mean()))
-    evaluate(y_test, y_pred_test)
+    # classifier = KNeighborsClassifier(n_neighbors=5)
+    # classifier.fit(X_train, y_train)
+    # y_pred = classifier.predict(X_test)
+    # evaluate(y_test, y_pred)
+
 
     for k in [1, 5, 9]:
         knn_clf = KNNClassifier(k)
@@ -126,18 +120,27 @@ if __name__ == '__main__':
         print('{}-nn validation acc: {}'.format(k, (y_pred_val == y_val).mean()))
         evaluate(y_test, y_pred_test)
 
-    c_values = [0.5, 1, 1.5, 2]
-    for C in c_values:
-        svm_clf = SVMClassifier(C=C)
-        svm_clf.fit(X_train, y_train)
-        y_pred_val = svm_clf.predict(X_val)
-        y_pred_test = svm_clf.predict(X_test)
-        print('svm-{} validation acc: {}'.format(C, (y_pred_val == y_val).mean()))
-        evaluate(y_test, y_pred_test)
 
-    random_forest_clf = RandomForest()
-    random_forest_clf.fit(X_train, y_train)
-    y_pred_val = random_forest_clf.predict(X_val)
-    y_pred_test = random_forest_clf.predict(X_test)
-    print('forest validation acc: {}'.format((y_pred_val == y_val).mean()))
+
+    nb_clf = NaiveBayesClassifier()
+    nb_clf.fit(X_train, y_train)
+    y_pred_val = nb_clf.predict(X_val)
+    y_pred_test = nb_clf.predict(X_test)
+    print('NB validation acc: {}'.format((y_pred_val == y_val).mean()))
     evaluate(y_test, y_pred_test)
+
+    # c_values = [0.5, 1, 1.5, 2]
+    # for C in c_values:
+    #     svm_clf = SVMClassifier(C=C)
+    #     svm_clf.fit(X_train, y_train)
+    #     y_pred_val = svm_clf.predict(X_val)
+    #     y_pred_test = svm_clf.predict(X_test)
+    #     print('svm-{} validation acc: {}'.format(C, (y_pred_val == y_val).mean()))
+    #     evaluate(y_test, y_pred_test)
+    #
+    # random_forest_clf = RandomForest()
+    # random_forest_clf.fit(X_train, y_train)
+    # y_pred_val = random_forest_clf.predict(X_val)
+    # y_pred_test = random_forest_clf.predict(X_test)
+    # print('forest validation acc: {}'.format((y_pred_val == y_val).mean()))
+    # evaluate(y_test, y_pred_test)

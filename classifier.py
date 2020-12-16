@@ -2,16 +2,18 @@ import numpy as np
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from math import log2
-
+from sklearn.preprocessing import StandardScaler
 
 class KNNClassifier:
     def __init__(self, k):
         self.k = k
         self.X_train = None
         self.y_train = None
+        self.scaler = StandardScaler()
 
     def fit(self, X, y):
-        self.X_train = X
+        self.scaler.fit(X)
+        self.X_train = self.scaler.transform(X)
         self.y_train = y
 
     @staticmethod
@@ -27,7 +29,8 @@ class KNNClassifier:
         d.sort(key=lambda t: t[1])
         return [d[i][0] for i in range(self.k)]
 
-    def predict(self, X_test):
+    def predict(self, X):
+        X_test = self.scaler.transform(X)
         y_pred = [self.majority(self.neighbors(x)) for x in X_test]
         return np.array(y_pred)
 
