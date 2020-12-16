@@ -53,10 +53,17 @@ def build_X(path):
 
 
 def evaluate(y_true, y_pred):
-    accuracy = np.mean(y_pred == y_true)
-    print(accuracy)
-    print(metrics.confusion_matrix(y_true, y_pred))
-    print(metrics.classification_report(y_true, y_pred, digits=3))
+    # accuracy = np.mean(y_pred == y_true)
+    # print(accuracy)
+    # print(metrics.confusion_matrix(y_true, y_pred))
+    # print(metrics.classification_report(y_true, y_pred, digits=3))
+    tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f1 = 2 * precision * recall / (precision + recall)
+    print("Precision: " + str(precision))
+    print("Recall: " + str(recall))
+    print("F1: " + str(f1))
     # TP = np.sum(np.logical_and(y_true == 1, y_pred == 1))
     # FP = np.sum(np.logical_and(y_true == 0, y_pred == 1))
     # TN = np.sum(np.logical_and(y_true == 0, y_pred == 0))
