@@ -51,6 +51,7 @@ def build_X(path):
     print(X_ted[X_ted != 0])
     return X_train, X_test, y_train, y_test, ids_ted, X_ted
 
+
 def evaluate(y_true, y_pred):
     print(metrics.classification_report(y_true, y_pred))
     tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
