@@ -88,6 +88,7 @@ class SVMClassifier:
         y_pred = self.clf.predict(X_test)
         return y_pred
 
+
 class RandomForest:
     def __init__(self):
         self.X_train = None

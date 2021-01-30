@@ -51,18 +51,24 @@ def build_X(path):
     print(X_ted[X_ted != 0])
     return X_train, X_test, y_train, y_test, ids_ted, X_ted
 
-
 def evaluate(y_true, y_pred):
-    accuracy = np.mean(y_pred == y_true)
-    print(accuracy)
-    print(metrics.confusion_matrix(y_true, y_pred))
-    print(metrics.classification_report(y_true, y_pred, digits=3))
-    # TP = np.sum(np.logical_and(y_true == 1, y_pred == 1))
-    # FP = np.sum(np.logical_and(y_true == 0, y_pred == 1))
-    # TN = np.sum(np.logical_and(y_true == 0, y_pred == 0))
-    # FN = np.sum(np.logical_and(y_true == 1, y_pred == 0))
-    # specifity = TN / (TN + FP)
-    # sensitivity = TP / (TP + FN)
+    print(metrics.classification_report(y_true, y_pred))
+    tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
+    precision_t = tp / (tp + fp)
+    precision_n = tn / (tn + fn)
+    precision_m = (precision_t + precision_n) / 2
+    recall_t = tp / (tp + fn)
+    recall_n = tn / (tn + fp)
+    recall_m = (recall_t + recall_n) / 2
+    f1_t = 2 * precision_t * recall_t / (precision_t + recall_t)
+    f1_n = 2 * precision_n * recall_n / (precision_n + recall_n)
+    f1_m = 2 * precision_m * recall_m / (precision_m + recall_m)
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    print('\t\tprecision\trecall\t\tf1-score\n')
+    print(f' 1\t\t{precision_t:0.4f}\t\t{recall_t:0.4f}\t\t{f1_t:0.4f}')
+    print(f'-1\t\t{precision_n:0.4f}\t\t{recall_n:0.4f}\t\t{f1_n:0.4f}')
+    print(f'\naccuracy\t\t\t\t\t{accuracy:0.4f}')
+    print(f'macro avg\t{precision_m:0.4f}\t\t{recall_m:0.4f}\t\t{f1_m:0.4f}')
 
 
 def test_search(ir, doc_ids, proximity=False, search_title=False):

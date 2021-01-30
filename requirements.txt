@@ -1,5 +1,8 @@
+beautifulsoup4
+selenium
 nltk
 hazm
 pandas
 numpy
 sklearn
+requests
