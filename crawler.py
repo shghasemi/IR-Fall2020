@@ -11,7 +11,8 @@ import numpy as np
 
 class Crawler:
     def __init__(self, max_cnt=5000, max_wait_thr=10):
-        self.driver = self.init_driver()
+        self.driver = None
+        self.init_driver()
         self.BASE_URL = 'https://academic.microsoft.com/paper/'
         self.PAPER_RGX = r'paper/(\d+)(/reference)?'
         self.max_cnt = max_cnt
@@ -26,7 +27,7 @@ class Crawler:
         options.add_argument('--headless')
         options.add_argument('--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) ' +
                              'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"')
-        return webdriver.Chrome(options=options)
+        self.driver = webdriver.Chrome(options=options)
 
     def init_queue(self):
         with open('crawler/start.txt') as file:
@@ -42,9 +43,19 @@ class Crawler:
             paper_id = self.queue.pop(0)
             if paper_id in self.explored:
                 continue
-            cnt += 1
-            self.explored.add(paper_id)
+
             paper = self.get_paper(paper_id)
+            if paper is None:
+                print(f'Driver fault - Paper{cnt:4}/{self.max_cnt:4} - {paper_id}')
+                self.driver.quit()
+                self.init_driver()
+                self.queue.insert(0, paper_id)
+                continue
+
+            self.explored.add(paper_id)
+            cnt += 1
+            if cnt % 100 == 0:
+                print(f'Paper {cnt:4}/{self.max_cnt} - {paper_id}')
             if not paper['references']:
                 print(paper_id)
             if self.extend_queue:
@@ -60,11 +71,15 @@ class Crawler:
             cnt += 1
             loaded = '<div class="primary_paper">' in self.driver.page_source
             # print(loaded)
+        return loaded
 
     def get_html(self, paper_id):
         self.driver.get(self.BASE_URL + paper_id)
-        self.wait()
-        return BeautifulSoup(self.driver.page_source, features='html.parser')
+        loaded = self.wait()
+        if loaded:
+            return BeautifulSoup(self.driver.page_source, features='html.parser')
+        else:
+            return None
 
     def make_json(self, paper_id, parsed_html):
         paper = {'id': paper_id,
@@ -77,6 +92,8 @@ class Crawler:
 
     def get_paper(self, paper_id):
         parsed_html = self.get_html(paper_id)
+        if parsed_html is None:
+            return None
         paper = self.make_json(paper_id, parsed_html)
         with open(f'crawler/papers/{paper_id}.json', 'w') as file:
             json.dump(paper, file, indent=2)
